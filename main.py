@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os 
 load_dotenv()
 api_key = os.getenv("API_KEY")
-
+from zagent.client import AnimationClient
 
 
 def main():
@@ -42,6 +42,34 @@ def main():
         )
         storyboards[topic.name] = storyboard
     print("==============> [storyboards]", storyboards)
+
+    # ═══════════════════════════════════════════════════
+    # Step 3: Animate storyboards with the Manim agent
+    # ═══════════════════════════════════════════════════
+    from langchain_google_genai import ChatGoogleGenerativeAI
+
+    langchain_model = ChatGoogleGenerativeAI(
+        model="gemini-2.5-flash",
+        temperature=1.0,
+    )
+
+    animation_client = AnimationClient(
+        langchain_model=langchain_model,
+        agent_workspace_path="./examples/agent_workspace/"
+    )
+
+    # Animate a single topic
+    result = animation_client.animate_single(
+        breakdown=breakdown,
+        storyboard=storyboards["Multi-Head Attention"],
+        topic_index=3,
+        max_iterations=5
+    )
+
+    if result.success:
+        print(f"Video saved to: {result.video_path}")
+    else:
+        print(f"Failed: {result.error_message}")
 
 
 if __name__ == "__main__":
