@@ -9,7 +9,7 @@ api_key = os.getenv("API_KEY")
 
 
 def main():
-    print("Hello from eduly!")
+    print("Hello from z-agent!")
 
     # Initialize Gemini client
     gemini_client = genai.Client(api_key=api_key)
@@ -28,6 +28,20 @@ def main():
     print(f"Document: {breakdown.document_title}")
     for i, topic in enumerate(breakdown.topics):
         print(f"  Topic {i}: {topic.name}")
+
+
+    # ═══════════════════════════════════════════════════
+    # Step 2: Generate storyboards for each topic
+    # ═══════════════════════════════════════════════════
+    storyboards = {}
+    for topic in breakdown.topics:
+        storyboard, _ = breakdown_client.storyboard(
+            topic=topic,
+            model="gemini-2.5-flash",
+            # thinking_level="high"
+        )
+        storyboards[topic.name] = storyboard
+    print("==============> [storyboards]", storyboards)
 
 
 if __name__ == "__main__":

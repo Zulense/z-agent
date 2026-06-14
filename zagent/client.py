@@ -4,6 +4,9 @@ from google.genai import types as gemini_types
 
 from .models import Breakdown, AtomicTopic, TopicStoryboard
 from prompts.breakdown import BREAKDOWN_PROMPT
+from prompts.storyboard import STORYBOARD_PROMPT, format_topic_input
+
+
 
 class BreakdownClient:
     """Client for breaking down documents and generating storyboards."""
@@ -19,7 +22,7 @@ class BreakdownClient:
     def breakdown(
         self,
         file_path: str | Path,
-        model: str = "gemini-3-flash-preview",
+        model: str = "gemini-2.5-flash",
         # thinking_level: str = "high",
     ) -> tuple[Breakdown, gemini_types.GenerateContentResponse]:
         """Break down a PDF document into atomic, self-contained topics.
@@ -84,7 +87,7 @@ class BreakdownClient:
         # Prepare contents - optionally include source file
         contents: list = []
         if source_file is not None:
-            source_file = pathlib.Path(source_file)
+            source_file = Path(source_file)
             uploaded_file = self.gemini_client.files.upload(file=source_file)
             contents.append(uploaded_file)
         contents.append(final_prompt)
@@ -93,13 +96,13 @@ class BreakdownClient:
         response = self.gemini_client.models.generate_content(
             model=model,
             config=gemini_types.GenerateContentConfig(
-                tools=[
-                    gemini_types.GoogleSearch(),
-                    gemini_types.Tool(code_execution=gemini_types.ToolCodeExecution),
-                ],
+                # tools=[
+                #     gemini_types.GoogleSearch(),
+                #     gemini_types.Tool(code_execution=gemini_types.ToolCodeExecution),
+                # ],
                 response_mime_type="application/json",
                 response_json_schema=TopicStoryboard.model_json_schema(),
-                thinking_config=gemini_types.ThinkingConfig(thinking_level=thinking_level),
+                # thinking_config=gemini_types.ThinkingConfig(thinking_level=thinking_level),
             ),
             contents=contents,
         )
